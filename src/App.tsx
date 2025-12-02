@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "./supabaseClient";
+
 
 
 const COLORS = {
@@ -20,15 +22,6 @@ type Question = {
 };
 
 type CategoryKey = "tradiciones" | "comida" | "villancicos" | "cine" | "curiosidades";
-
-// Sonidos globales (se sirven desde /public)
-const clickSound = new Audio("/sounds/click.mp3");
-const correctSound = new Audio("/sounds/correct.mp3");
-const wrongSound = new Audio("/sounds/wrong.wav");
-const bgMusic = new Audio("/sounds/bg-music.mp3");
-
-bgMusic.loop = true;
-bgMusic.volume = 0.4;
 
 const categories: { key: CategoryKey; label: string }[] = [
   { key: "tradiciones", label: "🎁 Tradiciones Navideñas" },
@@ -52,27 +45,28 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué se suele colocar en la parte más alta del árbol de Navidad?",
       options: [
-        { text: "Una estrella", correct: true },
         { text: "Una campana", correct: false },
         { text: "Un calcetín", correct: false },
+        { text: "Una estrella", correct: true },
         { text: "Un bastón de caramelo", correct: false },
       ],
     },
     {
       question: "¿Qué celebra la Navidad en la tradición cristiana?",
       options: [
-        { text: "El nacimiento de Jesús", correct: true },
         { text: "La llegada de los Reyes Magos", correct: false },
         { text: "El inicio del año nuevo", correct: false },
         { text: "El fin del invierno", correct: false },
+        { text: "El nacimiento de Jesús", correct: true },
       ],
     },
     {
       question: "¿Qué país es famoso por celebrar San Nicolás el 6 de diciembre?",
       options: [
-        { text: "Países Bajos", correct: true },
+
         { text: "Brasil", correct: false },
         { text: "Argentina", correct: false },
+        { text: "Países Bajos", correct: true },
         { text: "Japón", correct: false },
       ],
     },
@@ -81,16 +75,17 @@ const questionsDB: Record<CategoryKey, Question[]> = {
         "¿Cuál es el nombre tradicional del personaje que reparte regalos en España y Latinoamérica?",
       options: [
         { text: "Papá Noel", correct: false },
-        { text: "Santa Claus", correct: false },
         { text: "Los Reyes Magos", correct: true },
+        { text: "Santa Claus", correct: false },
         { text: "Elfos de invierno", correct: false },
       ],
     },
     {
       question: "¿Qué objeto se cuelga en las puertas como adorno navideño tradicional?",
       options: [
-        { text: "Una corona de ramas verdes", correct: true },
+
         { text: "Un muñeco de nieve", correct: false },
+        { text: "Una corona de ramas verdes", correct: true },
         { text: "Un reno de peluche", correct: false },
         { text: "Un bastón gigante", correct: false },
       ],
@@ -107,9 +102,10 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué se celebra el 6 de enero en muchos países hispanohablantes?",
       options: [
-        { text: "El Día de Reyes", correct: true },
+
         { text: "La Nochebuena", correct: false },
         { text: "La Nochevieja", correct: false },
+        { text: "El Día de Reyes", correct: true },
         { text: "El Día de los Inocentes", correct: false },
       ],
     },
@@ -117,10 +113,10 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué significado tiene tradicionalmente la estrella colocada en el árbol o el Belén?",
       options: [
-        { text: "La estrella de Belén", correct: true },
         { text: "Un copo de nieve", correct: false },
         { text: "El sol de invierno", correct: false },
         { text: "Un cometa decorativo", correct: false },
+        { text: "La estrella de Belén", correct: true },
       ],
     },
     {
@@ -138,17 +134,17 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué dulce navideño típico español se elabora principalmente con almendra y miel?",
       options: [
-        { text: "Turrón", correct: true },
         { text: "Mantecados", correct: false },
         { text: "Roscón de Reyes", correct: false },
         { text: "Panettone", correct: false },
+        { text: "Turrón", correct: true },
       ],
     },
     {
       question: "¿De qué país es originario el panettone navideño?",
       options: [
-        { text: "Italia", correct: true },
         { text: "Suecia", correct: false },
+        { text: "Italia", correct: true },
         { text: "Irlanda", correct: false },
         { text: "Canadá", correct: false },
       ],
@@ -166,9 +162,9 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué bebida caliente y especiada es típica en los mercados navideños europeos?",
       options: [
-        { text: "Vino caliente", correct: true },
         { text: "Limonada fría", correct: false },
         { text: "Café helado", correct: false },
+        { text: "Vino caliente", correct: true },
         { text: "Té con hielo", correct: false },
       ],
     },
@@ -176,8 +172,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué pescado es muy típico en la cena de Nochebuena en muchos países europeos?",
       options: [
-        { text: "Bacalao", correct: true },
         { text: "Atún", correct: false },
+        { text: "Bacalao", correct: true },
         { text: "Salmón crudo", correct: false },
         { text: "Sardinas fritas", correct: false },
       ],
@@ -185,17 +181,17 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué fruto seco es protagonista en muchos dulces navideños?",
       options: [
-        { text: "Almendra", correct: true },
         { text: "Cacahuete salado", correct: false },
         { text: "Girasol", correct: false },
         { text: "Pistacho solo", correct: false },
+        { text: "Almendra", correct: true },
       ],
     },
     {
       question: "¿Qué postre redondo y relleno se suele comer el 6 de enero en España?",
       options: [
-        { text: "Roscón de Reyes", correct: true },
         { text: "Tarta de queso", correct: false },
+        { text: "Roscón de Reyes", correct: true },
         { text: "Flan de huevo", correct: false },
         { text: "Brownie", correct: false },
       ],
@@ -213,8 +209,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Cuál de estos dulces se suele asociar a la Navidad en Alemania?",
       options: [
-        { text: "Stollen", correct: true },
         { text: "Macaron", correct: false },
+        { text: "Stollen", correct: true },
         { text: "Pastel de luna", correct: false },
         { text: "Churros", correct: false },
       ],
@@ -222,10 +218,10 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué acompañamiento dulce se deja a veces para Papá Noel junto al árbol?",
       options: [
-        { text: "Galletas y leche", correct: true },
         { text: "Pizza y refresco", correct: false },
         { text: "Palomitas y zumo", correct: false },
         { text: "Helado y café", correct: false },
+        { text: "Galletas y leche", correct: true },
       ],
     },
   ],
@@ -233,8 +229,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué villancico habla de peces que beben en el río?",
       options: [
-        { text: "Los peces en el río", correct: true },
         { text: "Campana sobre campana", correct: false },
+        { text: "Los peces en el río", correct: true },
         { text: "Ay del chiquirritín", correct: false },
         { text: "Dime Niño, ¿de quién eres?", correct: false },
       ],
@@ -242,26 +238,26 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué villancico repite la frase “Belén, campanas de Belén”?",
       options: [
-        { text: "Campana sobre campana", correct: true },
         { text: "Noche de paz", correct: false },
         { text: "El tamborilero", correct: false },
+        { text: "Campana sobre campana", correct: true },
         { text: "Adeste Fideles", correct: false },
       ],
     },
     {
       question: "¿Cómo se llama en español el villancico “Silent Night”?",
       options: [
-        { text: "Noche de paz", correct: true },
         { text: "Noche de luz", correct: false },
         { text: "Noche estrellada", correct: false },
         { text: "Noche blanca", correct: false },
+        { text: "Noche de paz", correct: true },
       ],
     },
     {
       question: "¿Qué instrumento destaca en el villancico “El tamborilero”?",
       options: [
-        { text: "El tambor", correct: true },
         { text: "El violín", correct: false },
+        { text: "El tambor", correct: true },
         { text: "La trompeta", correct: false },
         { text: "La flauta", correct: false },
       ],
@@ -270,8 +266,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Dónde se canta tradicionalmente un coro de villancicos llamado “Christmas carols”?",
       options: [
-        { text: "En países anglosajones", correct: true },
         { text: "Solo en Asia", correct: false },
+        { text: "En países anglosajones", correct: true },
         { text: "Solo en África", correct: false },
         { text: "Solo en Oceanía", correct: false },
       ],
@@ -279,9 +275,9 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Qué tema principal tienen la mayoría de villancicos tradicionales?",
       options: [
-        { text: "El nacimiento de Jesús", correct: true },
         { text: "Las vacaciones en la playa", correct: false },
         { text: "Las compras de rebajas", correct: false },
+        { text: "El nacimiento de Jesús", correct: true },
         { text: "El deporte de invierno", correct: false },
       ],
     },
@@ -289,10 +285,10 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué se suele hacer mientras se cantan villancicos en familia o con amigos?",
       options: [
-        { text: "Reunirse alrededor del árbol o el Belén", correct: true },
         { text: "Ir al cine", correct: false },
         { text: "Jugar a videojuegos", correct: false },
         { text: "Pintar murales", correct: false },
+        { text: "Reunirse alrededor del árbol o el Belén", correct: true },
       ],
     },
     {
@@ -308,19 +304,19 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿En qué época del año se suelen cantar los villancicos?",
       options: [
-        { text: "En Navidad", correct: true },
         { text: "En verano", correct: false },
         { text: "En primavera", correct: false },
+        { text: "En Navidad", correct: true },
         { text: "En otoño", correct: false },
       ],
     },
     {
       question: "¿Qué formato es típico para los villancicos en colegios y coros?",
       options: [
-        { text: "Coro de voces infantiles o mixtas", correct: true },
         { text: "Solo dúos de ópera", correct: false },
         { text: "Solo rap improvisado", correct: false },
         { text: "Solo música electrónica", correct: false },
+        { text: "Coro de voces infantiles o mixtas", correct: true },
       ],
     },
   ],
@@ -328,17 +324,17 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿En qué película navideña aparece el niño Kevin McCallister?",
       options: [
-        { text: "Solo en casa", correct: true },
         { text: "Arthur Christmas", correct: false },
         { text: "Elf", correct: false },
+        { text: "Solo en casa", correct: true },
         { text: "El Grinch", correct: false },
       ],
     },
     {
       question: "¿Qué criatura verde odia la Navidad al principio de su famosa película?",
       options: [
-        { text: "El Grinch", correct: true },
         { text: "Un ogro", correct: false },
+        { text: "El Grinch", correct: true },
         { text: "Un duende", correct: false },
         { text: "Un reno", correct: false },
       ],
@@ -356,40 +352,40 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué película romántica coral tiene lugar en Navidad y transcurre en Londres?",
       options: [
-        { text: "Love Actually", correct: true },
         { text: "The Holiday", correct: false },
         { text: "Klaus", correct: false },
         { text: "Polar Express", correct: false },
+        { text: "Love Actually", correct: true },
       ],
     },
     {
       question:
         "¿Qué vehículo mágico lleva a los niños al Polo Norte en una película animada?",
       options: [
-        { text: "Un tren llamado Polar Express", correct: true },
         { text: "Un submarino amarillo", correct: false },
         { text: "Un avión de papel", correct: false },
+        { text: "Un tren llamado Polar Express", correct: true },
         { text: "Una nave espacial", correct: false },
       ],
     },
     {
       question: "¿Qué personaje mítico protagoniza la película “Klaus”?",
       options: [
+        { text: "Un detective navideño", correct: false },
+        { text: "Un rey mago solitario", correct: false },
+        { text: "Un reno parlante", correct: false },
         {
           text: "Un repartidor de cartas y un fabricante de juguetes",
           correct: true,
         },
-        { text: "Un detective navideño", correct: false },
-        { text: "Un rey mago solitario", correct: false },
-        { text: "Un reno parlante", correct: false },
       ],
     },
     {
       question: "¿Qué emoción intenta recuperar el personaje de 'Elf' en la ciudad?",
       options: [
-        { text: "El espíritu navideño", correct: true },
         { text: "El miedo", correct: false },
         { text: "La ira", correct: false },
+        { text: "El espíritu navideño", correct: true },
         { text: "La envidia", correct: false },
       ],
     },
@@ -397,8 +393,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué suele ocurrir al final de muchas películas navideñas clásicas?",
       options: [
-        { text: "Un final feliz y emotivo", correct: true },
         { text: "Un gran terremoto", correct: false },
+        { text: "Un final feliz y emotivo", correct: true },
         { text: "Una invasión alienígena", correct: false },
         { text: "Un concurso de cocina", correct: false },
       ],
@@ -407,9 +403,9 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿En qué época del año se estrenan tradicionalmente muchas películas navideñas?",
       options: [
-        { text: "En los meses previos a Navidad", correct: true },
         { text: "En plena primavera", correct: false },
         { text: "Solo en verano", correct: false },
+        { text: "En los meses previos a Navidad", correct: true },
         { text: "En septiembre exclusivamente", correct: false },
       ],
     },
@@ -417,10 +413,10 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué elemento aparece casi siempre en el fondo de las escenas navideñas de cine?",
       options: [
-        { text: "Luces, nieve y decoraciones", correct: true },
         { text: "Playas tropicales", correct: false },
         { text: "Estadios de fútbol", correct: false },
         { text: "Desiertos de arena", correct: false },
+        { text: "Luces, nieve y decoraciones", correct: true },
       ],
     },
   ],
@@ -438,8 +434,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿En qué país la Navidad se celebra en pleno verano debido a que está en el hemisferio sur?",
       options: [
-        { text: "Australia", correct: true },
         { text: "Noruega", correct: false },
+        { text: "Australia", correct: true },
         { text: "Canadá", correct: false },
         { text: "Rusia", correct: false },
       ],
@@ -448,8 +444,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué fenómeno meteorológico se asocia visualmente con muchas postales navideñas?",
       options: [
-        { text: "La nieve", correct: true },
         { text: "La lluvia tropical", correct: false },
+        { text: "La nieve", correct: true },
         { text: "La niebla veraniega", correct: false },
         { text: "Las tormentas de arena", correct: false },
       ],
@@ -457,27 +453,27 @@ const questionsDB: Record<CategoryKey, Question[]> = {
     {
       question: "¿Cómo se llama el periodo de compras intenso que precede a la Navidad?",
       options: [
-        { text: "Campaña navideña", correct: true },
         { text: "Semana blanca", correct: false },
         { text: "Vacaciones de primavera", correct: false },
+        { text: "Campaña navideña", correct: true },
         { text: "Fiesta de otoño", correct: false },
       ],
     },
     {
       question: "¿Qué animal tira tradicionalmente del trineo de Papá Noel?",
       options: [
-        { text: "Renos", correct: true },
         { text: "Caballos", correct: false },
         { text: "Camellos", correct: false },
         { text: "Lobos árticos", correct: false },
+        { text: "Renos", correct: true },
       ],
     },
     {
       question: "¿Qué color NO se asocia normalmente con la Navidad?",
       options: [
-        { text: "Morado neón", correct: true },
         { text: "Rojo", correct: false },
         { text: "Verde", correct: false },
+        { text: "Morado neón", correct: true },
         { text: "Dorado", correct: false },
       ],
     },
@@ -485,8 +481,8 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué día se celebra el Día de los Santos Inocentes en muchos países hispanohablantes?",
       options: [
-        { text: "28 de diciembre", correct: true },
         { text: "1 de diciembre", correct: false },
+        { text: "28 de diciembre", correct: true },
         { text: "31 de diciembre", correct: false },
         { text: "2 de enero", correct: false },
       ],
@@ -495,9 +491,9 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué tipo de luz se usa mucho para decorar fachadas y árboles en Navidad?",
       options: [
-        { text: "Luces LED de colores", correct: true },
         { text: "Linternas de camping", correct: false },
         { text: "Focos de estadio", correct: false },
+        { text: "Luces LED de colores", correct: true },
         { text: "Lámparas de escritorio", correct: false },
       ],
     },
@@ -505,19 +501,19 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       question:
         "¿Qué elemento invernal se representa a menudo con bufanda y sombrero?",
       options: [
-        { text: "Un muñeco de nieve", correct: true },
         { text: "Un pingüino gigante", correct: false },
         { text: "Un árbol de hoja caduca", correct: false },
         { text: "Un castillo de arena", correct: false },
+        { text: "Un muñeco de nieve", correct: true },
       ],
     },
     {
       question:
         "¿Qué ocurre con la duración del día alrededor de la Navidad en el hemisferio norte?",
       options: [
-        { text: "Los días son cortos y las noches largas", correct: true },
         { text: "Los días son muy largos", correct: false },
         { text: "No hay cambios en la luz", correct: false },
+        { text: "Los días son cortos y las noches largas", correct: true },
         { text: "Siempre es de día", correct: false },
       ],
     },
@@ -555,9 +551,10 @@ function Snowfall() {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<"start" | "category" | "question" | "result" | "ranking">(
+  const [screen, setScreen] = useState<"start" | "name" | "category" | "question" | "result" | "ranking">(
     "start"
   );
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -566,6 +563,13 @@ export default function App() {
   const [showCongrats, setShowCongrats] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const [lastCategory, setLastCategory] = useState<CategoryKey | null>(null);
+  const [playerName, setPlayerName] = useState("");
+  const [confirmedName, setConfirmedName] = useState("");
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [rankingCategory, setRankingCategory] = useState<CategoryKey>("tradiciones");
+  const [isSaving, setIsSaving] = useState(false);
+
+
 
   useEffect(() => {
     if (screen !== "question") return;
@@ -580,25 +584,40 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, screen]);
 
-  const startGame = () => {
-    if (!musicStarted) {
-      bgMusic.play().catch(() => {});
-      setMusicStarted(true);
-    }
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
+  // Sonidos globales (se sirven desde /public)
+  const clickRef = useRef<HTMLAudioElement | null>(null);
+  const correctRef = useRef<HTMLAudioElement | null>(null);
+  const wrongRef = useRef<HTMLAudioElement | null>(null);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
 
-    setScreen("category");
-    setQuestions([]);
-    setQuestionIndex(0);
-    setScore(0);
-    setSelectedOption(null);
-    setShowCongrats(false);
-    setTimeLeft(15);
+  const startGame = () => {
+    // música de fondo
+    if (!musicStarted) {
+      if (!musicRef.current) {
+        musicRef.current = new Audio("/sounds/bg-music.mp3");
+        musicRef.current.loop = true;
+        musicRef.current.volume = 0.4;
+      }
+      musicRef.current
+        .play()
+        .then(() => setMusicStarted(true))
+        .catch(() => { });
+    }
+
+    // sonido de click
+    if (!clickRef.current) {
+      clickRef.current = new Audio("/sounds/click.mp3");
+    }
+    clickRef.current.currentTime = 0;
+    clickRef.current.play().catch(() => { });
+
+    // ahora solo cambiamos a la pantalla de nombre
+    setScreen("name");
   };
 
-  const selectCategory = (key: CategoryKey) => {
 
+
+  const selectCategory = (key: CategoryKey) => {
     const allQuestions = questionsDB[key];
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
 
@@ -628,12 +647,18 @@ export default function App() {
       optionIndex !== null ? currentQ.options[optionIndex].correct : false;
 
     if (isCorrect) {
-      correctSound.currentTime = 0;
-      correctSound.play().catch(() => {});
+      if (!correctRef.current) {
+        correctRef.current = new Audio("/sounds/correct.mp3");
+      }
+      correctRef.current.currentTime = 0;
+      correctRef.current.play().catch(() => { });
       setScore((prev) => prev + 1);
     } else {
-      wrongSound.currentTime = 0;
-      wrongSound.play().catch(() => {});
+      if (!wrongRef.current) {
+        wrongRef.current = new Audio("/sounds/wrong.wav");
+      }
+      wrongRef.current.currentTime = 0;
+      wrongRef.current.play().catch(() => { });
     }
 
     setTimeout(() => {
@@ -647,9 +672,40 @@ export default function App() {
         if (finalScore > 3) {
           setShowCongrats(true);
         }
+        setPlayerName("");
         setScreen("result");
       }
     }, 1500);
+  };
+
+  const guardarPartida = async () => {
+    if (!confirmedName.trim() || !lastCategory) return;
+
+    try {
+      setIsSaving(true);
+      const { error } = await supabase.from("partidas").insert({
+        nombre: confirmedName.trim(),
+        puntuacion: score,
+        categoria: lastCategory,   // antes: "todas"
+      });
+      if (!error && lastCategory) {
+        await cargarRanking(lastCategory);
+      }
+
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const cargarRanking = async (cat: CategoryKey | "todas") => {
+    let query = supabase.from("partidas").select("*");
+    if (cat !== "todas") {
+      query = query.eq("categoria", cat);
+    }
+    const { data, error } = await query
+      .order("puntuacion", { ascending: false })
+      .limit(10);
+    if (!error && data) setRanking(data);
   };
 
   const CongratsMessage = () => (
@@ -686,6 +742,20 @@ export default function App() {
     >
       <Snowfall />
 
+      {/* Logo fijo arriba en todas las pantallas */}
+      <img
+        src="/images/logo.jpg"
+        alt="Logo de la empresa"
+        style={{
+          width: 120,
+          height: 120,
+          borderRadius: "50%",     // lo hace circular
+          objectFit: "cover",      // recorta si no es cuadrado
+          border: `3px solid ${COLORS.gold}`,
+          marginBottom: 16,
+        }}
+      />
+
       <div
         style={{
           width: "100%",
@@ -696,6 +766,8 @@ export default function App() {
           gap: 24,
         }}
       >
+        {/* aquí van screen === "start", "name", etc. */}
+
         {screen === "start" && (
           <div style={{ textAlign: "center", color: COLORS.gold, width: "100%" }}>
             <h1
@@ -717,6 +789,7 @@ export default function App() {
                 ✨
               </span>
             </h1>
+
             <button
               onClick={startGame}
               style={{
@@ -732,10 +805,15 @@ export default function App() {
                 marginBottom: 20,
                 width: "100%",
                 maxWidth: 280,
+                lineHeight: "1.2",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+                appearance: "none",
               }}
             >
               Jugar
             </button>
+
             <div
               style={{
                 display: "flex",
@@ -744,10 +822,18 @@ export default function App() {
                 gap: 12,
               }}
             >
+              {/* Clasificación */}
               <button
                 onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
+                  if (!clickRef.current) {
+                    clickRef.current = new Audio("/sounds/click.mp3");
+                  }
+                  clickRef.current.currentTime = 0;
+                  clickRef.current.play().catch(() => { });
+
+                  const defaultCat: CategoryKey = "tradiciones";
+                  setRankingCategory(defaultCat);
+                  cargarRanking(defaultCat);
                   setScreen("ranking");
                 }}
                 style={{
@@ -757,14 +843,26 @@ export default function App() {
                   padding: "0.5rem 1.2rem",
                   cursor: "pointer",
                   fontSize: "0.9rem",
+                  color: COLORS.green,
+                  fontWeight: "bold",
+                  lineHeight: "1.2",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  appearance: "none",
                 }}
               >
                 Clasificación
               </button>
+
+              {/* Ajustes */}
               <button
                 onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
+                  if (!clickRef.current) {
+                    clickRef.current = new Audio("/sounds/click.mp3");
+                  }
+                  clickRef.current.currentTime = 0;
+                  clickRef.current.play().catch(() => { });
+
                   alert("Ajustes próximamente");
                 }}
                 style={{
@@ -774,15 +872,27 @@ export default function App() {
                   padding: "0.5rem 1.2rem",
                   cursor: "pointer",
                   fontSize: "0.9rem",
+                  color: COLORS.green,
+                  fontWeight: "bold",
+                  lineHeight: "1.2",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  appearance: "none",
                 }}
               >
                 Ajustes
               </button>
+
+              {/* Sobre el juego */}
               <button
                 onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
-                  alert("Juego navideño interactivo, disfruta!");
+                  if (!clickRef.current) {
+                    clickRef.current = new Audio("/sounds/click.mp3");
+                  }
+                  clickRef.current.currentTime = 0;
+                  clickRef.current.play().catch(() => { });
+
+                  alert("Juego navideño interactivo, ¡disfruta!");
                 }}
                 style={{
                   backgroundColor: COLORS.white,
@@ -791,11 +901,115 @@ export default function App() {
                   padding: "0.5rem 1.2rem",
                   cursor: "pointer",
                   fontSize: "0.9rem",
+                  color: COLORS.green,
+                  fontWeight: "bold",
+                  lineHeight: "1.2",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  appearance: "none",
                 }}
               >
                 Sobre el juego
               </button>
             </div>
+          </div>
+        )}
+
+
+        {screen === "name" && (
+          <div
+            style={{
+              textAlign: "center",
+              color: COLORS.gold,
+              width: "100%",
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: `"Playfair Display", serif`,
+                fontSize: "clamp(1.6rem, 5vw, 2.2rem)",
+                marginBottom: "1rem",
+              }}
+            >
+              ¿Cómo te llamas?
+            </h2>
+
+            <p style={{ marginBottom: 12, color: COLORS.white }}>
+              Escribe tu nombre para guardar tu puntuación en el ranking.
+            </p>
+
+            <input
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              maxLength={40}
+              style={{
+                width: "100%",
+                maxWidth: 320,
+                padding: "0.6rem 0.9rem",
+                borderRadius: 8,
+                border: `1px solid ${COLORS.gold}`,
+                boxSizing: "border-box",
+                marginBottom: 16,
+              }}
+            />
+
+            <div
+              style={{
+                marginTop: 8,
+                display: "flex",
+                justifyContent: "center",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => {
+                  setPlayerName("");
+                  setScreen("start");
+                }}
+                style={{
+                  backgroundColor: COLORS.white,
+                  borderRadius: 8,
+                  padding: "0.4rem 1rem",
+                  border: `2px solid ${COLORS.gold}`,
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: COLORS.green,
+                  fontWeight: "bold",
+                }}
+              >
+                Volver al inicio
+              </button>
+
+              <button
+                onClick={() => {
+                  const name = playerName.trim();
+                  if (!name) return;
+                  setConfirmedName(name);
+                  setScreen("category");
+                  setQuestions([]);
+                  setQuestionIndex(0);
+                  setScore(0);
+                  setSelectedOption(null);
+                  setShowCongrats(false);
+                  setTimeLeft(15);
+                }}
+                style={{
+                  backgroundColor: COLORS.gold,   // antes COLORS.white
+                  borderRadius: 8,
+                  padding: "0.4rem 1rem",
+                  border: `2px solid ${COLORS.white}`,
+                  cursor: playerName.trim() ? "pointer" : "not-allowed",
+                  fontSize: "0.9rem",
+                  color: COLORS.green,
+                  fontWeight: "bold",
+                }}
+                disabled={!playerName.trim()}
+              >
+                Continuar
+              </button>
+            </div>
+
           </div>
         )}
 
@@ -827,8 +1041,12 @@ export default function App() {
                 <div
                   key={cat.key}
                   onClick={() => {
-                    clickSound.currentTime = 0;
-                    clickSound.play().catch(() => {});
+                    if (!clickRef.current) {
+                      clickRef.current = new Audio("/sounds/click.mp3");
+                    }
+                    clickRef.current.currentTime = 0;
+                    clickRef.current.play().catch(() => { });
+
                     selectCategory(cat.key);
                   }}
                   style={{
@@ -996,40 +1214,89 @@ export default function App() {
         {screen === "result" && (
           <div
             style={{
-              textAlign: "center",
-              color: COLORS.gold,
-              background: `linear-gradient(135deg, ${COLORS.green}, ${COLORS.gold})`,
+              backgroundColor: COLORS.white,
+              borderRadius: 16,
               padding: 24,
-              borderRadius: 20,
-              boxShadow: `0 0 20px ${COLORS.gold}`,
+              maxWidth: 480,
               width: "100%",
-              maxWidth: 500,
+              textAlign: "center",
             }}
           >
-            {showCongrats && <CongratsMessage />}
-            <h2
-              style={{
-                fontFamily: `"Playfair Display", serif`,
-                marginBottom: 16,
-                fontSize: "clamp(1.4rem, 4vw, 1.8rem)",
-              }}
-            >
-              Has acertado: {score}/{questions.length} preguntas
-            </h2>
+            {showCongrats ? (
+              <>
+                <CongratsMessage />
+                <img
+                  src="/images/felicitacion.jpg"
+                  alt="Postal navideña ilustrada"
+                  style={{
+                    width: "100%",
+                    maxWidth: 320,
+                    borderRadius: 12,
+                    margin: "0 auto 16px",
+                    boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+                  }}
+                />
+              </>
+            ) : (
+              <div
+                style={{
+                  color: COLORS.green,
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  marginBottom: "1rem",
+                }}
+              >
+                Has acertado {score} preguntas. ¡Sigue intentándolo!
+              </div>
+            )}
+
+            {/* resto de botones de Ver ranking / Volver al inicio */}
+
+
+            <p style={{ marginBottom: 16, color: COLORS.green }}>
+              Puntuación de {confirmedName || "jugador"}: {score} puntos.
+            </p>
+
             <div
               style={{
-                marginTop: 16,
+                marginTop: 8,
                 display: "flex",
-                flexWrap: "wrap",
+                gap: 8,
                 justifyContent: "center",
-                gap: 12,
+                flexWrap: "wrap",
               }}
             >
               <button
                 onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
+                  guardarPartida();
+                  if (lastCategory) {
+                    setRankingCategory(lastCategory);
+                    cargarRanking(lastCategory);
+                  }
+                  setScreen("ranking");
+                }}
+                style={{
+                  backgroundColor: COLORS.green,
+                  borderRadius: 12,
+                  padding: "0.6rem 1.4rem",
+                  border: `2px solid ${COLORS.gold}`,
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  color: COLORS.white,
+                  fontSize: "0.9rem",
+                }}
+              >
+                Ver ranking
+              </button>
+
+              <button
+                onClick={() => {
                   setScreen("start");
+                  setShowCongrats(false);
+                  setQuestions([]);
+                  setScore(0);
+                  setSelectedOption(null);
+                  setTimeLeft(15);
                 }}
                 style={{
                   backgroundColor: COLORS.white,
@@ -1044,125 +1311,72 @@ export default function App() {
               >
                 Volver al inicio
               </button>
-              <button
-                onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
-                  startGame();
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  borderRadius: 12,
-                  padding: "0.6rem 1.4rem",
-                  border: `2px solid ${COLORS.gold}`,
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  color: COLORS.green,
-                  fontSize: "0.9rem",
-                }}
-              >
-                Jugar otra vez
-              </button>
-              <button
-                onClick={() => {
-                  clickSound.currentTime = 0;
-                  clickSound.play().catch(() => {});
-                  alert(`Compartir puntuación: ${score}/${questions.length} 🎁`);
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  borderRadius: 12,
-                  padding: "0.6rem 1.4rem",
-                  border: `2px solid ${COLORS.gold}`,
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  color: COLORS.green,
-                  fontSize: "0.9rem",
-                }}
-              >
-                Compartir puntuación 🎁
-              </button>
             </div>
           </div>
         )}
 
         {screen === "ranking" && (
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 600,
-              textAlign: "center",
-              backgroundColor: COLORS.white,
-              borderRadius: 16,
-              padding: 20,
-              boxShadow: "0 0 12px rgba(212,175,55,0.7)",
-              color: COLORS.green,
-            }}
-          >
+          <div style={{ backgroundColor: COLORS.white, borderRadius: 16, padding: 24, maxWidth: 480, width: "100%", textAlign: "center" }}>
             <h2
               style={{
                 fontFamily: `"Playfair Display", serif`,
-                marginBottom: 24,
-                fontSize: "clamp(1.4rem, 4vw, 1.8rem)",
+                fontSize: "1.6rem",
+                marginBottom: 16,
+                color: COLORS.green,
               }}
             >
-              Clasificación
+              Ranking – {categories.find(c => c.key === rankingCategory)?.label}
             </h2>
-            <div style={{ marginBottom: 12 }}>
-              <div
-                style={{
-                  border: `3px solid ${COLORS.gold}`,
-                  borderRadius: 12,
-                  padding: 10,
-                  marginBottom: 8,
-                  backgroundColor: "#fff9e6",
-                  fontWeight: "bold",
-                  fontSize: "1.1rem",
-                }}
-              >
-                🥇 Juan - 9 puntos
-              </div>
-              <div
-                style={{
-                  border: `3px solid silver`,
-                  borderRadius: 12,
-                  padding: 10,
-                  marginBottom: 8,
-                  backgroundColor: "#f7f7f7",
-                  fontWeight: "bold",
-                  fontSize: "1rem",
-                }}
-              >
-                🥈 María - 7 puntos
-              </div>
-              <div
-                style={{
-                  border: `3px solid ${COLORS.green}`,
-                  borderRadius: 12,
-                  padding: 10,
-                  fontWeight: "bold",
-                  fontSize: "1rem",
-                  backgroundColor: "#ecf8f3",
-                }}
-              >
-                🥉 Luis - 6 puntos
-              </div>
+
+            {/* Botones para cambiar de categoría */}
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginBottom: 12 }}>
+              {categories.map(cat => (
+                <button
+                  key={cat.key}
+                  onClick={() => {
+                    setRankingCategory(cat.key);
+                    cargarRanking(cat.key);
+                  }}
+                  style={{
+                    backgroundColor: cat.key === rankingCategory ? COLORS.gold : COLORS.white,
+                    borderRadius: 8,
+                    padding: "0.3rem 0.8rem",
+                    border: `2px solid ${COLORS.gold}`,
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    color: COLORS.green,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
+
+            {ranking.length === 0 ? (
+              <p style={{ color: COLORS.green }}>Aún no hay partidas guardadas.</p>
+            ) : (
+              <div style={{ textAlign: "center", paddingLeft: 20, color: COLORS.green }}>
+                {ranking.map((p, index) => (
+                  <div key={p.id} style={{ marginBottom: 4 }}>
+                    {index + 1}. {p.nombre} – {p.puntuacion} pts
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
-              onClick={() => {
-                clickSound.currentTime = 0;
-                clickSound.play().catch(() => {});
-                setScreen("start");
-              }}
+              onClick={() => setScreen("start")}
               style={{
-                backgroundColor: COLORS.gold,
+                marginTop: 16,
+                backgroundColor: COLORS.white,
                 borderRadius: 12,
-                padding: "0.8rem 2rem",
-                border: "none",
+                padding: "0.6rem 1.4rem",
+                border: `2px solid ${COLORS.gold}`,
                 cursor: "pointer",
                 fontWeight: "bold",
-                color: COLORS.white,
-                fontSize: "0.95rem",
+                color: COLORS.green,
+                fontSize: "0.9rem",
               }}
             >
               Volver al inicio
