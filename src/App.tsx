@@ -567,7 +567,6 @@ export default function App() {
   const [confirmedName, setConfirmedName] = useState("");
   const [ranking, setRanking] = useState<any[]>([]);
   const [rankingCategory, setRankingCategory] = useState<CategoryKey>("tradiciones");
-  const [isSaving, setIsSaving] = useState(false);
 
 
 
@@ -682,7 +681,7 @@ export default function App() {
     if (!confirmedName.trim() || !lastCategory) return;
 
     try {
-      setIsSaving(true);
+      //setIsSaving(true);
       const { error } = await supabase.from("partidas").insert({
         nombre: confirmedName.trim(),
         puntuacion: score,
@@ -693,7 +692,7 @@ export default function App() {
       }
 
     } finally {
-      setIsSaving(false);
+      //setIsSaving(false);
     }
   };
 
@@ -1267,14 +1266,11 @@ export default function App() {
               }}
             >
               <button
-                onClick={() => {
-                  guardarPartida();
-                  if (lastCategory) {
-                    setRankingCategory(lastCategory);
-                    cargarRanking(lastCategory);
-                  }
+                onClick={async () => {
+                  await guardarPartida();
                   setScreen("ranking");
                 }}
+
                 style={{
                   backgroundColor: COLORS.green,
                   borderRadius: 12,
