@@ -324,16 +324,6 @@ const questionsDB: Record<CategoryKey, Question[]> = {
         { text: "Súbeme la radio", correct: false },
       ],
     },
-    {
-      question:
-        "Imagina que un reno con la nariz roja guiara un coro de villancicos. ¿A qué personaje clásico recuerda?",
-      options: [
-        { text: "Rudolph", correct: true },
-        { text: "Prancer", correct: false },
-        { text: "Dasher", correct: false },
-        { text: "Vixen", correct: false },
-      ],
-    },
   ],
   cine: [
     {
@@ -872,64 +862,6 @@ export default function App() {
                 }}
               >
                 Clasificación
-              </button>
-
-              {/* Ajustes */}
-              <button
-                onClick={() => {
-                  if (!clickRef.current) {
-                    clickRef.current = new Audio("/sounds/click.mp3");
-                  }
-                  clickRef.current.currentTime = 0;
-                  clickRef.current.play().catch(() => { });
-
-                  alert("Ajustes próximamente");
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  border: `2px solid ${COLORS.gold}`,
-                  borderRadius: 8,
-                  padding: "0.5rem 1.2rem",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: COLORS.green,
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                  WebkitAppearance: "none",
-                  MozAppearance: "none",
-                  appearance: "none",
-                }}
-              >
-                Ajustes
-              </button>
-
-              {/* Sobre el juego */}
-              <button
-                onClick={() => {
-                  if (!clickRef.current) {
-                    clickRef.current = new Audio("/sounds/click.mp3");
-                  }
-                  clickRef.current.currentTime = 0;
-                  clickRef.current.play().catch(() => { });
-
-                  alert("Juego navideño interactivo, ¡disfruta!");
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  border: `2px solid ${COLORS.gold}`,
-                  borderRadius: 8,
-                  padding: "0.5rem 1.2rem",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: COLORS.green,
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                  WebkitAppearance: "none",
-                  MozAppearance: "none",
-                  appearance: "none",
-                }}
-              >
-                Sobre el juego
               </button>
             </div>
           </div>
