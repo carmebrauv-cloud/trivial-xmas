@@ -24,11 +24,11 @@ type Question = {
 type CategoryKey = "tradiciones" | "comida" | "villancicos" | "cine" | "curiosidades";
 
 const categories: { key: CategoryKey; label: string }[] = [
-  { key: "tradiciones", label: "🎁 Tradiciones Navideñas" },
+  { key: "tradiciones", label: "🎁 Tradiciones" },
   { key: "comida", label: "🍪 Comida y Dulces" },
   { key: "villancicos", label: "🎶 Villancicos y Música" },
   { key: "cine", label: "🎬 Cine Navideño" },
-  { key: "curiosidades", label: "❄ Curiosidades Invernales" },
+  { key: "curiosidades", label: "❄ Curiosidades Navideñas" },
 ];
 
 const questionsDB: Record<CategoryKey, Question[]> = {
@@ -141,7 +141,7 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question: "¿De qué país es originario el panettone navideño?",
+      question: "En Hello Valencia nos encanta los panettones de Polo ¿de donde son originarios?",
       options: [
         { text: "Suecia", correct: false },
         { text: "Italia", correct: true },
@@ -159,24 +159,23 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Qué bebida caliente y especiada es típica en los mercados navideños europeos?",
+      question: "¿Qué bebida espumosa se usa para el brindis de Año Nuevo?",
       options: [
-        { text: "Limonada fría", correct: false },
-        { text: "Café helado", correct: false },
-        { text: "Vino caliente", correct: true },
-        { text: "Té con hielo", correct: false },
+        { text: "Cerveza rubia", correct: false },
+        { text: "Sidra o cava", correct: true },
+        { text: "Té verde", correct: false },
+        { text: "Vermú", correct: false },
       ],
     },
     {
-      question:
-        "¿Qué pescado es muy típico en la cena de Nochebuena en muchos países europeos?",
+      question: "¿Qué ingrediente destaca en las galletas típicas de Navidad?",
       options: [
-        { text: "Atún", correct: false },
-        { text: "Bacalao", correct: true },
-        { text: "Salmón crudo", correct: false },
-        { text: "Sardinas fritas", correct: false },
+        { text: "Vainilla", correct: false },
+        { text: "Chocolate", correct: false },
+        { text: "Jengibre", correct: true },
+        { text: "Coco", correct: false },
       ],
+
     },
     {
       question: "¿Qué fruto seco es protagonista en muchos dulces navideños?",
@@ -197,13 +196,12 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Qué dulce navideño británico se prepara con frutos secos y se flamea con alcohol?",
+      question: "¿Qué figura se esconde dentro del Roscón de Reyes?",
       options: [
-        { text: "Christmas pudding", correct: true },
-        { text: "Crème brûlée", correct: false },
-        { text: "Baklava", correct: false },
-        { text: "Cheesecake", correct: false },
+        { text: "Un reno", correct: false },
+        { text: "Un muñeco o haba", correct: true },
+        { text: "Una estrella", correct: false },
+        { text: "Un ángel", correct: false },
       ],
     },
     {
@@ -216,41 +214,59 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question: "¿Qué acompañamiento dulce se deja a veces para Papá Noel junto al árbol?",
+      question: "¿Qué se le deja a los camellos de los Reyes Magos mientras que dejan los regalos?",
       options: [
-        { text: "Pizza y refresco", correct: false },
-        { text: "Palomitas y zumo", correct: false },
-        { text: "Helado y café", correct: false },
-        { text: "Galletas y leche", correct: true },
+        { text: "Pizza", correct: false },
+        { text: "Palomitas", correct: false },
+        { text: "Helado", correct: false },
+        { text: "Zanahorias", correct: true },
+      ],
+    },
+    {
+      question: "¿Qué dulce español está hecho de yema de huevo caramelizada?",
+      options: [
+        { text: "Polvorones", correct: false },
+        { text: "Yemas de Santa Teresa", correct: true },
+        { text: "Mazapán", correct: false },
+        { text: "Rosquillas", correct: false },
+      ],
+    },
+    {
+      question: "Marqués de Riscal es el protagonista de la portada Soul de diciembre ¿de donde es típico el vino caliente?",
+      options: [
+        { text: "La fiesta del aniverario de Hello", correct: false },
+        { text: "Despues de comernos las uvas", correct: false },
+        { text: "En el tardeo de nochebuena", correct: false },
+        { text: "Los mercados navideños europeos", correct: true },
       ],
     },
   ],
   villancicos: [
     {
-      question: "¿Qué villancico habla de peces que beben en el río?",
+      question: "Las Lucias de Hello son muy fan de los villancicos Bisbal ¿cuál de estos artistas es el más escuchado en este época?",
       options: [
-        { text: "Campana sobre campana", correct: false },
-        { text: "Los peces en el río", correct: true },
-        { text: "Ay del chiquirritín", correct: false },
-        { text: "Dime Niño, ¿de quién eres?", correct: false },
+        { text: "Leticia Sabater", correct: false },
+        { text: "Mariah Carey", correct: true },
+        { text: "Bad Bunny", correct: false },
+        { text: "Melendi", correct: false },
       ],
     },
     {
-      question: "¿Qué villancico repite la frase “Belén, campanas de Belén”?",
+      question: "¿Cuál de estos instrumentos es típico en muchas canciones navideñas españolas?",
       options: [
-        { text: "Noche de paz", correct: false },
-        { text: "El tamborilero", correct: false },
-        { text: "Campana sobre campana", correct: true },
-        { text: "Adeste Fideles", correct: false },
+        { text: "Gaita", correct: false },
+        { text: "Zambomba", correct: true },
+        { text: "Trompeta", correct: false },
+        { text: "Flauta travesera", correct: false },
       ],
     },
     {
-      question: "¿Cómo se llama en español el villancico “Silent Night”?",
+      question: "¿Qué canción navideña se convirtió en un éxito de Wham!?",
       options: [
-        { text: "Noche de luz", correct: false },
-        { text: "Noche estrellada", correct: false },
-        { text: "Noche blanca", correct: false },
-        { text: "Noche de paz", correct: true },
+        { text: "Let It Snow", correct: false },
+        { text: "White Christmas", correct: false },
+        { text: "Last Christmas", correct: true },
+        { text: "Holly Jolly Christmas", correct: false },
       ],
     },
     {
@@ -263,22 +279,21 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Dónde se canta tradicionalmente un coro de villancicos llamado “Christmas carols”?",
+      question: "¿Qué canción navideña mezcla inglés y español y es conocida mundialmente?",
       options: [
-        { text: "Solo en Asia", correct: false },
-        { text: "En países anglosajones", correct: true },
-        { text: "Solo en África", correct: false },
-        { text: "Solo en Oceanía", correct: false },
+        { text: "Navidad, Navidad", correct: false },
+        { text: "Feliz Navidad", correct: true },
+        { text: "Noche de Paz", correct: false },
+        { text: "Let It Snow", correct: false },
       ],
     },
     {
-      question: "¿Qué tema principal tienen la mayoría de villancicos tradicionales?",
+      question: "¿En qué canción aparece una historia de un reno con la nariz roja?",
       options: [
-        { text: "Las vacaciones en la playa", correct: false },
-        { text: "Las compras de rebajas", correct: false },
-        { text: "El nacimiento de Jesús", correct: true },
-        { text: "El deporte de invierno", correct: false },
+        { text: "Rudolph the Red-Nosed Reindeer", correct: true },
+        { text: "Frosty the Snowman", correct: false },
+        { text: "Let It Snow", correct: false },
+        { text: "Santa Baby", correct: false },
       ],
     },
     {
@@ -292,31 +307,31 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
+      question: "¿Qué artista lanzó un álbum navideño en el que mezcla jazz con canciones tradicionales?",
+      options: [
+        { text: "Michael Bublé", correct: true },
+        { text: "Ariana Grande", correct: false },
+        { text: "Bruno Mars", correct: false },
+        { text: "Billie Eilish", correct: false },
+      ],
+    },
+    {
+      question: "¿Cuál de estas canciones en español es un villancico clásico?",
+      options: [
+        { text: "Los peces en el río", correct: true },
+        { text: "La Macarena", correct: false },
+        { text: "Torero", correct: false },
+        { text: "Súbeme la radio", correct: false },
+      ],
+    },
+    {
       question:
-        "¿Qué palabra aparece con frecuencia en muchos villancicos para expresar alegría?",
+        "Imagina que un reno con la nariz roja guiara un coro de villancicos. ¿A qué personaje clásico recuerda?",
       options: [
-        { text: "Aleluya", correct: true },
-        { text: "Adiós", correct: false },
-        { text: "Silencio", correct: false },
-        { text: "Suspenso", correct: false },
-      ],
-    },
-    {
-      question: "¿En qué época del año se suelen cantar los villancicos?",
-      options: [
-        { text: "En verano", correct: false },
-        { text: "En primavera", correct: false },
-        { text: "En Navidad", correct: true },
-        { text: "En otoño", correct: false },
-      ],
-    },
-    {
-      question: "¿Qué formato es típico para los villancicos en colegios y coros?",
-      options: [
-        { text: "Solo dúos de ópera", correct: false },
-        { text: "Solo rap improvisado", correct: false },
-        { text: "Solo música electrónica", correct: false },
-        { text: "Coro de voces infantiles o mixtas", correct: true },
+        { text: "Rudolph", correct: true },
+        { text: "Prancer", correct: false },
+        { text: "Dasher", correct: false },
+        { text: "Vixen", correct: false },
       ],
     },
   ],
@@ -359,13 +374,12 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Qué vehículo mágico lleva a los niños al Polo Norte en una película animada?",
+      question: "¿Qué película navideña tiene un fantasma del pasado, del presente y del futuro?",
       options: [
-        { text: "Un submarino amarillo", correct: false },
-        { text: "Un avión de papel", correct: false },
-        { text: "Un tren llamado Polar Express", correct: true },
-        { text: "Una nave espacial", correct: false },
+        { text: "Un cuento de Navidad", correct: true },
+        { text: "Elf", correct: false },
+        { text: "Solo en casa", correct: false },
+        { text: "Klaus", correct: false },
       ],
     },
     {
@@ -390,13 +404,12 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Qué suele ocurrir al final de muchas películas navideñas clásicas?",
+      question: "¿Qué animal mágico acompaña a Santa en muchas películas?",
       options: [
-        { text: "Un gran terremoto", correct: false },
-        { text: "Un final feliz y emotivo", correct: true },
-        { text: "Una invasión alienígena", correct: false },
-        { text: "Un concurso de cocina", correct: false },
+        { text: "Caballos alados", correct: false },
+        { text: "Pingüinos parlantes", correct: false },
+        { text: "Renos", correct: true },
+        { text: "Zorros árticos", correct: false },
       ],
     },
     {
@@ -422,22 +435,31 @@ const questionsDB: Record<CategoryKey, Question[]> = {
   ],
   curiosidades: [
     {
-      question: "¿En qué estación del año cae la Navidad en el hemisferio norte?",
+      question: "¿Quién NO suele aparecer en un belén tradicional de Navidad?",
       options: [
-        { text: "Invierno", correct: true },
-        { text: "Verano", correct: false },
-        { text: "Otoño", correct: false },
-        { text: "Primavera", correct: false },
+        { text: "La perrita Puka de Silvia", correct: true },
+        { text: "Un pastor con ovejas", correct: false },
+        { text: "Un ángel anunciando la llegada", correct: false },
+        { text: "Un buey y una mula", correct: false },
+      ],
+    },
+    {
+      question: "¿Qué se celebra el 22 de diciembre en España?",
+      options: [
+        { text: "La llegada de Papá Noel", correct: false },
+        { text: "La cabalgata de Reyes", correct: false },
+        { text: "El sorteo de la Lotería de Navidad", correct: true },
+        { text: "El encendido de las luces", correct: false },
       ],
     },
     {
       question:
-        "¿En qué país la Navidad se celebra en pleno verano debido a que está en el hemisferio sur?",
+        "¿Dónde nació Jesús según la tradición cristiana?",
       options: [
-        { text: "Noruega", correct: false },
-        { text: "Australia", correct: true },
-        { text: "Canadá", correct: false },
-        { text: "Rusia", correct: false },
+        { text: "En Nazaret", correct: false },
+        { text: "En Belén", correct: true },
+        { text: "En Oliva, como Manolo", correct: false },
+        { text: "En Roma", correct: false },
       ],
     },
     {
@@ -488,13 +510,12 @@ const questionsDB: Record<CategoryKey, Question[]> = {
       ],
     },
     {
-      question:
-        "¿Qué tipo de luz se usa mucho para decorar fachadas y árboles en Navidad?",
+      question: "¿Qué figura navideña tiene nariz de zanahoria?",
       options: [
-        { text: "Linternas de camping", correct: false },
-        { text: "Focos de estadio", correct: false },
-        { text: "Luces LED de colores", correct: true },
-        { text: "Lámparas de escritorio", correct: false },
+        { text: "El reno Rodolfo", correct: false },
+        { text: "Un muñeco de nieve", correct: true },
+        { text: "Un duende", correct: false },
+        { text: "Papá Noel", correct: false },
       ],
     },
     {
