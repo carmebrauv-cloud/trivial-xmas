@@ -1352,7 +1352,16 @@ export default function App() {
             {ranking.length === 0 ? (
               <p style={{ color: COLORS.green }}>Aún no hay partidas guardadas.</p>
             ) : (
-              <div style={{ textAlign: "center", paddingLeft: 20, color: COLORS.green }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  paddingLeft: 20,
+                  color: COLORS.green,
+                  maxHeight: 220,      // ajusta para que veas ~10 nombres
+                  overflowY: "auto",
+                  marginTop: 4,
+                }}
+              >
                 {ranking.map((p, index) => (
                   <div key={p.id} style={{ marginBottom: 4 }}>
                     {index + 1}. {p.nombre} – {p.puntuacion} pts
@@ -1360,6 +1369,7 @@ export default function App() {
                 ))}
               </div>
             )}
+
 
             <button
               onClick={() => setScreen("start")}
