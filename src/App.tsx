@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "./supabaseClient";
-
 
 
 const COLORS = {
@@ -562,7 +560,7 @@ function Snowfall() {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<"start" | "name" | "category" | "question" | "result" | "ranking">(
+  const [screen, setScreen] = useState<"start" | "category" | "question" | "result">(
     "start"
   );
 
@@ -574,11 +572,6 @@ export default function App() {
   const [showCongrats, setShowCongrats] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const [lastCategory, setLastCategory] = useState<CategoryKey | null>(null);
-  const [playerName, setPlayerName] = useState("");
-  const [confirmedName, setConfirmedName] = useState("");
-  const [ranking, setRanking] = useState<any[]>([]);
-  const [rankingCategory, setRankingCategory] = useState<CategoryKey>("tradiciones");
-
 
 
   useEffect(() => {
@@ -621,8 +614,7 @@ export default function App() {
     clickRef.current.currentTime = 0;
     clickRef.current.play().catch(() => { });
 
-    // ahora solo cambiamos a la pantalla de nombre
-    setScreen("name");
+    setScreen("category");
   };
 
 
@@ -682,40 +674,9 @@ export default function App() {
         if (finalScore > 3) {
           setShowCongrats(true);
         }
-        setPlayerName("");
         setScreen("result");
       }
     }, 1500);
-  };
-
-  const guardarPartida = async () => {
-    if (!confirmedName.trim() || !lastCategory) return;
-
-    try {
-      //setIsSaving(true);
-      const { error } = await supabase.from("partidas").insert({
-        nombre: confirmedName.trim(),
-        puntuacion: score,
-        categoria: lastCategory,   // antes: "todas"
-      });
-      if (!error && lastCategory) {
-        await cargarRanking(lastCategory);
-      }
-
-    } finally {
-      //setIsSaving(false);
-    }
-  };
-
-  const cargarRanking = async (cat: CategoryKey | "todas") => {
-    let query = supabase.from("partidas").select("*");
-    if (cat !== "todas") {
-      query = query.eq("categoria", cat);
-    }
-    const { data, error } = await query
-      .order("puntuacion", { ascending: false })
-      .limit(10);
-    if (!error && data) setRanking(data);
   };
 
   const CongratsMessage = () => (
@@ -776,7 +737,7 @@ export default function App() {
           gap: 24,
         }}
       >
-        {/* aquí van screen === "start", "name", etc. */}
+
 
         {screen === "start" && (
           <div style={{ textAlign: "center", color: COLORS.gold, width: "100%" }}>
@@ -832,136 +793,7 @@ export default function App() {
                 gap: 12,
               }}
             >
-              {/* Clasificación */}
-              <button
-                onClick={() => {
-                  if (!clickRef.current) {
-                    clickRef.current = new Audio("/sounds/click.mp3");
-                  }
-                  clickRef.current.currentTime = 0;
-                  clickRef.current.play().catch(() => { });
-
-                  const defaultCat: CategoryKey = "tradiciones";
-                  setRankingCategory(defaultCat);
-                  cargarRanking(defaultCat);
-                  setScreen("ranking");
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  border: `2px solid ${COLORS.gold}`,
-                  borderRadius: 8,
-                  padding: "0.5rem 1.2rem",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: COLORS.green,
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                  WebkitAppearance: "none",
-                  MozAppearance: "none",
-                  appearance: "none",
-                }}
-              >
-                Clasificación
-              </button>
             </div>
-          </div>
-        )}
-
-
-        {screen === "name" && (
-          <div
-            style={{
-              textAlign: "center",
-              color: COLORS.gold,
-              width: "100%",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: `"Playfair Display", serif`,
-                fontSize: "clamp(1.6rem, 5vw, 2.2rem)",
-                marginBottom: "1rem",
-              }}
-            >
-              ¿Cómo te llamas?
-            </h2>
-
-            <p style={{ marginBottom: 12, color: COLORS.white }}>
-              Escribe tu nombre para guardar tu puntuación en el ranking.
-            </p>
-
-            <input
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              maxLength={40}
-              style={{
-                width: "100%",
-                maxWidth: 320,
-                padding: "0.6rem 0.9rem",
-                borderRadius: 8,
-                border: `1px solid ${COLORS.gold}`,
-                boxSizing: "border-box",
-                marginBottom: 16,
-              }}
-            />
-
-            <div
-              style={{
-                marginTop: 8,
-                display: "flex",
-                justifyContent: "center",
-                gap: 8,
-                flexWrap: "wrap",
-              }}
-            >
-              <button
-                onClick={() => {
-                  setPlayerName("");
-                  setScreen("start");
-                }}
-                style={{
-                  backgroundColor: COLORS.white,
-                  borderRadius: 8,
-                  padding: "0.4rem 1rem",
-                  border: `2px solid ${COLORS.gold}`,
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: COLORS.green,
-                  fontWeight: "bold",
-                }}
-              >
-                Volver al inicio
-              </button>
-
-              <button
-                onClick={() => {
-                  const name = playerName.trim();
-                  if (!name) return;
-                  setConfirmedName(name);
-                  setScreen("category");
-                  setQuestions([]);
-                  setQuestionIndex(0);
-                  setScore(0);
-                  setSelectedOption(null);
-                  setShowCongrats(false);
-                  setTimeLeft(15);
-                }}
-                style={{
-                  backgroundColor: COLORS.gold,   // antes COLORS.white
-                  borderRadius: 8,
-                  padding: "0.4rem 1rem",
-                  border: `2px solid ${COLORS.white}`,
-                  cursor: playerName.trim() ? "pointer" : "not-allowed",
-                  fontSize: "0.9rem",
-                  color: COLORS.green,
-                  fontWeight: "bold",
-                }}
-                disabled={!playerName.trim()}
-              >
-                Continuar
-              </button>
-            </div>
-
           </div>
         )}
 
@@ -1202,11 +1034,8 @@ export default function App() {
               </div>
             )}
 
-            {/* resto de botones de Ver ranking / Volver al inicio */}
-
-
             <p style={{ marginBottom: 16, color: COLORS.green }}>
-              Puntuación de {confirmedName || "jugador"}: {score} puntos.
+              Has conseguido {score} puntos.
             </p>
 
             <div
@@ -1218,25 +1047,6 @@ export default function App() {
                 flexWrap: "wrap",
               }}
             >
-              <button
-                onClick={async () => {
-                  await guardarPartida();
-                  setScreen("ranking");
-                }}
-
-                style={{
-                  backgroundColor: COLORS.green,
-                  borderRadius: 12,
-                  padding: "0.6rem 1.4rem",
-                  border: `2px solid ${COLORS.gold}`,
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  color: COLORS.white,
-                  fontSize: "0.9rem",
-                }}
-              >
-                Ver ranking
-              </button>
 
               <button
                 onClick={() => {
@@ -1261,85 +1071,6 @@ export default function App() {
                 Volver al inicio
               </button>
             </div>
-          </div>
-        )}
-
-        {screen === "ranking" && (
-          <div style={{ backgroundColor: COLORS.white, borderRadius: 16, padding: 24, maxWidth: 480, width: "100%", textAlign: "center" }}>
-            <h2
-              style={{
-                fontFamily: `"Playfair Display", serif`,
-                fontSize: "1.6rem",
-                marginBottom: 16,
-                color: COLORS.green,
-              }}
-            >
-              Ranking – {categories.find(c => c.key === rankingCategory)?.label}
-            </h2>
-
-            {/* Botones para cambiar de categoría */}
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginBottom: 12 }}>
-              {categories.map(cat => (
-                <button
-                  key={cat.key}
-                  onClick={() => {
-                    setRankingCategory(cat.key);
-                    cargarRanking(cat.key);
-                  }}
-                  style={{
-                    backgroundColor: cat.key === rankingCategory ? COLORS.gold : COLORS.white,
-                    borderRadius: 8,
-                    padding: "0.3rem 0.8rem",
-                    border: `2px solid ${COLORS.gold}`,
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                    color: COLORS.green,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
-            {ranking.length === 0 ? (
-              <p style={{ color: COLORS.green }}>Aún no hay partidas guardadas.</p>
-            ) : (
-              <div
-                style={{
-                  textAlign: "center",
-                  paddingLeft: 20,
-                  color: COLORS.green,
-                  maxHeight: 220,      // ajusta para que veas ~10 nombres
-                  overflowY: "auto",
-                  marginTop: 4,
-                }}
-              >
-                {ranking.map((p, index) => (
-                  <div key={p.id} style={{ marginBottom: 4 }}>
-                    {index + 1}. {p.nombre} – {p.puntuacion} pts
-                  </div>
-                ))}
-              </div>
-            )}
-
-
-            <button
-              onClick={() => setScreen("start")}
-              style={{
-                marginTop: 16,
-                backgroundColor: COLORS.white,
-                borderRadius: 12,
-                padding: "0.6rem 1.4rem",
-                border: `2px solid ${COLORS.gold}`,
-                cursor: "pointer",
-                fontWeight: "bold",
-                color: COLORS.green,
-                fontSize: "0.9rem",
-              }}
-            >
-              Volver al inicio
-            </button>
           </div>
         )}
       </div>
